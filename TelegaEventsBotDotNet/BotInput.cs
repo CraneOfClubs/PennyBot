@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Mime;
 using System.Text;
 
 namespace TelegaEventsBotDotNet
@@ -11,7 +13,10 @@ namespace TelegaEventsBotDotNet
         private SettingsWrapper _settingsWrapper;
         public BotInput(Telegram.Bot.TelegramBotClient BotClient)
         {
-            _settingsWrapper = new SettingsWrapper("Messages.xml");
+            var path = System.IO.Path.GetDirectoryName( 
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+            path = path.Substring(6);
+            _settingsWrapper = new SettingsWrapper(Directory.GetCurrentDirectory()+"/configs/Messages.xml");
             _bot = BotClient;
             _callbacks = new BotCallbacks(this, _bot);
         }
