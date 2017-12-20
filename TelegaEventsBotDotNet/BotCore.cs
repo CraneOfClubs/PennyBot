@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NLog;
 
 namespace TelegaEventsBotDotNet
 {
     class BotCore
     {
+       
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private String _apiKey;
         private Telegram.Bot.TelegramBotClient _bot;
         private BotInput _inputWrapper;

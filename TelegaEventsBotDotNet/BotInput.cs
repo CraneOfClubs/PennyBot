@@ -1,17 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Mime;
 using System.Text;
+using NLog;
 
 namespace TelegaEventsBotDotNet
 {
     class BotInput
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+ 
         private BotCallbacks _callbacks;
         private Telegram.Bot.TelegramBotClient _bot;
         private SettingsWrapper _settingsWrapper;
         public BotInput(Telegram.Bot.TelegramBotClient BotClient)
         {
-            _settingsWrapper = new SettingsWrapper("Messages.xml");
+            var path = System.IO.Path.GetDirectoryName( 
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase);
+            path = path.Substring(6);
+            _settingsWrapper = new SettingsWrapper(Directory.GetCurrentDirectory()+"/configs/Messages.xml");
             _bot = BotClient;
             _callbacks = new BotCallbacks(this, _bot);
         }
@@ -31,6 +39,7 @@ namespace TelegaEventsBotDotNet
             }
             var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(buttonLayout);
             _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
+            logger.Info("Client connected and asked to start.");
             Console.WriteLine("Client connected and asked to start.");
         }
 
@@ -44,6 +53,7 @@ namespace TelegaEventsBotDotNet
             }
             var keyboard = new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(buttonLayout);
             _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
+            logger.Info("Client asked for nearby events.");
             Console.WriteLine("Client asked for nearby events.");
         }
 
@@ -59,6 +69,7 @@ namespace TelegaEventsBotDotNet
                 SelectedId = rand.Next(ids.Count);
                 rLEvent = db.GetEventById(ids[SelectedId]);
                 _bot.SendTextMessageAsync(chatId, _settingsWrapper.ParseEvent(rLEvent), Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                logger.Info("Sent event to client, id: {0}.", rLEvent.EventId);
                 Console.WriteLine("Sent event to client, id: {0}.", rLEvent.EventId);
             }
         }
@@ -67,10 +78,12 @@ namespace TelegaEventsBotDotNet
         {
             if (Command == "/say")
             {
+                logger.Info("user enter /say");
                 GreetMessage(ChatID, ReplyMessageId);
             }
             if (Command == "/start")
             {
+                logger.Info("user enter /start");
                 StartSearchMessage(ChatID);
             }
         }

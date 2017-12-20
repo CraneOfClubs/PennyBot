@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NLog;
 
 namespace TelegaEventsBotDotNet
 {
     class BotCallbacks
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        
         private BotInput _botInput;
         private Telegram.Bot.TelegramBotClient _bot;
         public BotCallbacks(BotInput BotInput, Telegram.Bot.TelegramBotClient Bot)
@@ -18,12 +21,14 @@ namespace TelegaEventsBotDotNet
         {
             if (Callback == "SearchNearbyDate")
             {
+                logger.Info("calling SearchNearbyDate");
                 _botInput.SearchNerbyDateEventsMessage(ChatID, ReplyMessageId);
 
             }
 
             if (Callback == "SearchNearbyToday")
             {
+                logger.Info("calling SearchNearToday");
                 _botInput.SearchNerbyToday(ChatID, ReplyMessageId);
 
             }
