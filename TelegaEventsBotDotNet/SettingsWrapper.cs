@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using NLog;
 
 namespace TelegaEventsBotDotNet
 {
@@ -65,6 +66,8 @@ namespace TelegaEventsBotDotNet
     }
     class SettingsWrapper
     {
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+        
         private XmlDocument _settingsDocument;
         private String _xmlFileName;
         public SettingsWrapper(String FileName)
@@ -236,11 +239,13 @@ namespace TelegaEventsBotDotNet
 
         public MessageWithButtons StartSearchMessage()
         {
+            logger.Debug("Start searching messages");
             return ParseMessageWithButtons("StartSearchMessage");
         }
 
         public MessageWithButtons SearchNearbyDate()
         {
+            logger.Debug("Start searching near by date");
             return ParseMessageWithButtons("SearchNearbyDate");
         }
     }

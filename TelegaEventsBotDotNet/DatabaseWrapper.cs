@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 
 namespace TelegaEventsBotDotNet
 {
@@ -25,6 +26,7 @@ namespace TelegaEventsBotDotNet
     public class DatabaseWrapper
     {
 
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         public DatabaseWrapper()
         {
 
