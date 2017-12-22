@@ -7,7 +7,7 @@ namespace TelegaEventsBotDotNet
 {
     class BotCallbacks
     {
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        aprivate static Logger logger = LogManager.GetCurrentClassLogger();
         
         private BotInput _botInput;
         private Telegram.Bot.TelegramBotClient _bot;
