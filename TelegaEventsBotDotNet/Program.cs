@@ -11,7 +11,7 @@ namespace TelegaEventsBotDotNet
         static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
-            BotCore Bot = new BotCore("410044882:AAEJ3rCjuKeJE6zoVzYL_Zz7IKLSUQiQCY0");
+            BotCore Bot = new BotCore("481134187:AAFr29kyPK4MV5HiLFj-GquDAqJNVP5nnzw");
         }
     }
 }
