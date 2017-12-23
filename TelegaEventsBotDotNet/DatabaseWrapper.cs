@@ -38,12 +38,11 @@ namespace TelegaEventsBotDotNet
             using (SqlConnection connection = new SqlConnection(
             "Data Source=telegram.crczform3iip.eu-central-1.rds.amazonaws.com,1433;Network Library=DBMSSOCN; Initial Catalog = Events; User ID = administrator; Password = pt1cagrach; "))
             {
-                string test1 = "";
                 connection.Open();
                 DateTime localDate = DateTime.Now.Date;
-                localDate = localDate.AddHours(23);
-                localDate = localDate.AddMinutes(59);
-                localDate = localDate.AddSeconds(59);
+                //localDate = localDate.AddHours(23);
+                //localDate = localDate.AddMinutes(59);
+                //localDate = localDate.AddSeconds(59);
                 String query = "SELECT event_id from [Events].[dbo].[events] where datetime <= '" + localDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
 
                 SqlCommand command = new SqlCommand(query, connection);
@@ -56,7 +55,6 @@ namespace TelegaEventsBotDotNet
                         ids.Add((int)reader[0]);
                     }
                 }
-                // Pool B is created because the connection strings differ.
             }
             return ids;
         }
