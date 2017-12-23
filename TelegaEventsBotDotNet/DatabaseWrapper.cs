@@ -77,12 +77,18 @@ namespace TelegaEventsBotDotNet
                 {
                     while (reader.Read())
                     {
-                        rlevent.EventId = (int)reader[0];
-                        rlevent.MarkupType = (string)reader[1];
-                        rlevent.Label = (string)reader[2];
-                        rlevent.Description = (string)reader[3];
-                        rlevent.Location = (string)reader[4];
-                        rlevent.dateTime = (DateTime)reader[5];
+                        if (!reader.IsDBNull(0))
+                            rlevent.EventId = (int)reader[0];
+                        if (!reader.IsDBNull(1))
+                            rlevent.MarkupType = (string)reader[1];
+                        if (!reader.IsDBNull(2))
+                            rlevent.Label = (string)reader[2];
+                        if (!reader.IsDBNull(3))
+                            rlevent.Description = (string)reader[3];
+                        if (!reader.IsDBNull(4))
+                            rlevent.Location = (string)reader[4];
+                        if (!reader.IsDBNull(5))
+                            rlevent.dateTime = (DateTime)reader[5];
                         if (!reader.IsDBNull(6))
                         {
                             rlevent.Optional1 = (string)reader[6];
