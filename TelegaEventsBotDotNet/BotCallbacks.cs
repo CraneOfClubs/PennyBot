@@ -26,6 +26,13 @@ namespace TelegaEventsBotDotNet
 
             }
 
+            if (Callback == "PopularTags" && Callback == "StartSearchMessage3")
+            {
+                logger.Info("calling SearchNearbyDate");
+                _botInput.SearchNerbyDateEventsMessage(ChatID, ReplyMessageId);
+
+            }
+
             if (Callback == "SearchNearbyToday")
             {
                 logger.Info("calling SearchNearToday");
