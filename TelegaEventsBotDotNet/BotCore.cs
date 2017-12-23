@@ -33,7 +33,7 @@ namespace TelegaEventsBotDotNet
             {
                 var message = ev.CallbackQuery.Message;
                 _inputWrapper.HandleCallback(ev.CallbackQuery.Data, message.Chat.Id, message.MessageId);
-                await _bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id); // отсылаем пустое, чтобы убрать "частики" на кнопке
+                //await _bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id); // отсылаем пустое, чтобы убрать "частики" на кнопке
                 //if (ev.CallbackQuery.Data == "callback1")
                 //{
                 //    await _bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id, "Хуй " + ev.CallbackQuery.Data, true);
