@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Messages>
+    <Message name="StartSearchMessage" type="BotLogic">
+        <Text>Start search text</Text>
+        <Buttons>
+            <Button>
+                <Text>Случайное событие на ближайшее время</Text>
+                <Callback>SearchNearbyDate</Callback>
+            </Button>
+            <Button>
+                <Text>Искать по ключевым словам</Text>
+                <Callback>SearchByKeywords</Callback>
+            </Button>
+			<Button>
+                <Text>Искать по дате</Text>
+                <Callback>SearchByDate</Callback>
+            </Button>
+        </Buttons>
+    </Message>
+    <Message name="SearchNearbyDate" type="BotLogic">
+        <Text>Какое время?</Text>
+        <Buttons>
+            <Button>
+                <Text>Сегодня</Text>
+                <Callback>SearchNearbyToday</Callback>
+            </Button>
+            <Button>
+                <Text>Завтра</Text>
+                <Callback>SearchNearbyTomorrow</Callback>
+            </Button>
+            <Button>
+                <Text>На этой неделе</Text>
+                <Callback>SearchNearbyThisWeek</Callback>
+            </Button>
+        </Buttons>
+    </Message>
+	<Message name="SearchByKeywords" type="BotLogic">
+        <Text>Введи ключевые слова через пробел!</Text>
+    </Message>
+	<Message name="NoEventsFound" type="BotLogic">
+        <Text>Событий не найдено ;(</Text>
+    </Message>
+	<Message name="SearchByDate" type="BotLogic">
+        <Text>Вводи дату в формате дд/мм/гггг или дд-мм-гггг!</Text>
+    </Message>
+	<Message name="RepeatSearchByKeywords" type="BotLogic">
+        <Text>Хочешь повторить поиск?</Text>
+		<Buttons>
+		    <Button>
+                <Text>Повторить!</Text>
+                <Callback>SearchByKeywords</Callback>
+            </Button>
+		    <Button>
+                <Text>В начало.</Text>
+                <Callback>StartSearchMessage</Callback>
+            </Button>
+		</Buttons>
+    </Message>
+	<Message name="RepeatSearchRandom" type="BotLogic">
+        <Text>Хочешь повторить поиск?</Text>
+		<Buttons>
+		    <Button>
+                <Text>Повторить!</Text>
+                <Callback>SearchNearbyDate</Callback>
+            </Button>
+		    <Button>
+                <Text>В начало.</Text>
+                <Callback>StartSearchMessage</Callback>
+            </Button>
+		</Buttons>
+    </Message>
+	<Message name="RepeatSearchByDate" type="BotLogic">
+        <Text>Не могу разобрать дату ;( Вводи ее в формате дд/мм/гггг или дд-мм-гггг. Если хочешь повторить - вводи снова!</Text>
+		<Buttons>
+		    <Button>
+                <Text>В начало.</Text>
+                <Callback>StartSearchMessage</Callback>
+            </Button>
+		</Buttons>
+    </Message>
+	<Message name="RepeatSearchByDateNotFound" type="BotLogic">
+        <Text>Ничего не найдено ;( Если хочешь повторить - вводи снова!</Text>
+		<Buttons>
+		    <Button>
+                <Text>В начало.</Text>
+                <Callback>StartSearchMessage</Callback>
+            </Button>
+		</Buttons>
+    </Message>
+	<Message name="RepeatSearchByDateSuccess" type="BotLogic">
+        <Text>Вот события! ;) Если хочешь повторить - вводи снова!</Text>
+		<Buttons>
+		    <Button>
+                <Text>В начало.</Text>
+                <Callback>StartSearchMessage</Callback>
+            </Button>
+		</Buttons>
+    </Message>
+    <Message name="ConcreteEvent" type="Event">
+        <Events>
+            <Event name ="default" markup_type = "default">
+                <Label>$LABEL</Label>
+                <Text>$TEXT</Text>
+                <Location>$LOCATION</Location>
+                <DateTime>$DATETIME</DateTime>
+                <OptionalParameter1>$ENTRANCEFEE</OptionalParameter1>
+                <OptionalParameter2>$HYPERLINK</OptionalParameter2>
+                <MarkUp>
+*$LABEL*
+
+$TEXT
+
+_$ENTRANCEFEE_
+
+🏠 $LOCATION
+⏰ $DATETIME
+✏️ [ВК]($HYPERLINK)
+                </MarkUp>
+            </Event>
+        </Events>
+    </Message>
+</Messages>

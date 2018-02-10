@@ -10,8 +10,9 @@ namespace TelegaEventsBotDotNet
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Bot initialization...");
             BotCore Bot = new BotCore("410044882:AAEJ3rCjuKeJE6zoVzYL_Zz7IKLSUQiQCY0");
+            
         }
     }
 }

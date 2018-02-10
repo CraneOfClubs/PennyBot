@@ -200,8 +200,23 @@ namespace TelegaEventsBotDotNet
             return Ready;
         }
 
+        public MessageWithButtons NoEventsFound()
+        {
+            return ParseMessageWithButtons("NoEventsFound");
+        }
+
+        public MessageWithButtons SearchByDate()
+        {
+            //logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("SearchByDate");
+        }
+
         public String ParseEvent(RLEvent rLEvent)
         {
+            if (rLEvent.Label == null)
+            {
+                return NoEventsFound().Text;
+            }
             var message = new MessageWithButtons();
             _settingsDocument = new XmlDocument();
             _settingsDocument.Load(_xmlFileName);
@@ -209,7 +224,6 @@ namespace TelegaEventsBotDotNet
             XmlElement xRoot = _settingsDocument.DocumentElement;
             foreach (XmlNode xnode in xRoot)
             {
-                // получаем атрибут name
                 if (xnode.Attributes.Count > 0)
                 {
                     XmlNode attr = xnode.Attributes.GetNamedItem("name");
@@ -243,10 +257,45 @@ namespace TelegaEventsBotDotNet
             return ParseMessageWithButtons("StartSearchMessage");
         }
 
+        public MessageWithButtons RepeatSearchByKeywords()
+        {
+            return ParseMessageWithButtons("RepeatSearchByKeywords");
+        }
+
         public MessageWithButtons SearchNearbyDate()
         {
             logger.Debug("Start searching near by date");
             return ParseMessageWithButtons("SearchNearbyDate");
+        }
+
+        public MessageWithButtons SearchByKeywords()
+        {
+            logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("SearchByKeywords");
+        }
+
+        public MessageWithButtons RepeatSearchRandom()
+        {
+            logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("RepeatSearchRandom");
+        }
+
+        public MessageWithButtons RepeatSearchByDate()
+        {
+            logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("RepeatSearchByDate");
+        }
+
+        public MessageWithButtons RepeatSearchByDateNotFound()
+        {
+            logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("RepeatSearchByDateNotFound");
+        }
+
+        public MessageWithButtons RepeatSearchByDateSuccess()
+        {
+            logger.Debug("Start searching near by date");
+            return ParseMessageWithButtons("RepeatSearchByDateSuccess");
         }
     }
 }

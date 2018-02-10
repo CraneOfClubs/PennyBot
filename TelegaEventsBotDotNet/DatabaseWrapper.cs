@@ -5,22 +5,63 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NLog;
+using MySql.Data.MySqlClient;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
+using MySql.Data.Entity;
+using System.Data.Common;
 
 namespace TelegaEventsBotDotNet
 {
+    [DbConfigurationType(typeof(MySqlEFConfiguration))]
+    public class EventContext : DbContext
+    {
+        public virtual DbSet<RLEvent> Events { get; set; }
+        public EventContext() : base()
+        {
+
+        }
+
+        public EventContext(DbConnection existingConnection, bool contextOwnsConnection)
+      : base(existingConnection, contextOwnsConnection)
+        {
+
+        }
+
+    }
+
+    [Table("events")]
     public class RLEvent
     {
+        [Column(name: "markup_type")]
         public String MarkupType { get; set; }
+        [Column(name: "label")]
         public String Label { get; set; }
+        [Column(name: "description")]
         public String Description { get; set; }
+        [Column(name: "location")]
         public String Location { get; set; }
+        [Column(name: "optional_1")]
         public String Optional1 { get; set; }
+        [Column(name: "optional_2")]
         public String Optional2 { get; set; }
+        [Column(name: "optional_3")]
         public String Optional3 { get; set; }
+        [Column(name: "optional_4")]
         public String Optional4 { get; set; }
+        [Column(name: "optional_5")]
         public String Optional5 { get; set; }
+        [Column(name: "optional_6")]
         public String Optional6 { get; set; }
+        [Column(name: "tags")]
+        public String Tags { get; set; }
+        [Column(name: "type")]
+        public String Type { get; set; }
+        [Column(name: "date_time")]
         public DateTime dateTime { get; set; }
+        [Required, Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column(name: "event_id")]
         public Int64 EventId { get; set; }
     }
     public class DatabaseWrapper
@@ -32,87 +73,50 @@ namespace TelegaEventsBotDotNet
 
         }
 
-        public List<int> GetTodayEventsIds()
+        public List<RLEvent> GetEventsBetween(DateTime start, DateTime finish)
         {
-            List<int> ids = new List<int>();
-            using (SqlConnection connection = new SqlConnection(
-            "Data Source=telegram.crczform3iip.eu-central-1.rds.amazonaws.com,1433;Network Library=DBMSSOCN; Initial Catalog = Events; User ID = administrator; Password = pt1cagrach; "))
+            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["NskEventsDB"].ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                string test1 = "";
-                connection.Open();
-                DateTime localDate = DateTime.Now.Date;
-                localDate = localDate.AddHours(23);
-                localDate = localDate.AddMinutes(59);
-                localDate = localDate.AddSeconds(59);
-                String query = "SELECT event_id from [Events].[dbo].[events] where datetime <= '" + localDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
-
-                SqlCommand command = new SqlCommand(query, connection);
-                int test = command.ExecuteNonQuery();
-
-                using (SqlDataReader reader = command.ExecuteReader())
+                using (var context = new EventContext(connection, false))
                 {
-                    while (reader.Read())
-                    {
-                        ids.Add((int)reader[0]);
-                    }
+                    var _events = from ev in context.Events
+                                  where (ev.dateTime >= start && ev.dateTime <= finish)
+                                  select ev;
+                    return _events.ToList<RLEvent>();
                 }
-                // Pool B is created because the connection strings differ.
             }
-            return ids;
         }
 
-        public RLEvent GetEventById(Int64 ID)
+        public List<RLEvent> GetEventIDsByKeyword(List<String> Keywords)
         {
-            RLEvent rlevent = new RLEvent();
-            using (SqlConnection connection = new SqlConnection(
-            "Data Source=telegram.crczform3iip.eu-central-1.rds.amazonaws.com,1433;Network Library=DBMSSOCN; Initial Catalog = Events; User ID = administrator; Password = pt1cagrach; "))
+            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["NskEventsDB"].ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
             {
-                connection.Open();
-                String query = "SELECT * from [Events].[dbo].[events] where event_id = " + ID;
-
-                SqlCommand command = new SqlCommand(query, connection);
-                int test = command.ExecuteNonQuery();
-
-                using (SqlDataReader reader = command.ExecuteReader())
+                using (var context = new EventContext(connection, false))
                 {
-                    while (reader.Read())
+                    List<RLEvent> result = new List<RLEvent>();
+                    foreach (var key in Keywords)
                     {
-                        rlevent.EventId = (int)reader[0];
-                        rlevent.MarkupType = (string)reader[1];
-                        rlevent.Label = (string)reader[2];
-                        rlevent.Description = (string)reader[3];
-                        rlevent.Location = (string)reader[4];
-                        rlevent.dateTime = (DateTime)reader[5];
-                        if (!reader.IsDBNull(6))
+                        var matches = from ev in context.Events
+                                      where ev.Label.Contains(key) || ev.Description.Contains(key)
+                                      select ev;
+                        foreach (var m in matches)
                         {
-                            rlevent.Optional1 = (string)reader[6];
-                        }
-                        if (!reader.IsDBNull(7))
-                        {
-                            rlevent.Optional2 = (string)reader[7];
-                        }
-                        if (!reader.IsDBNull(8))
-                        {
-                            rlevent.Optional3 = (string)reader[8];
-                        }
-                        if (!reader.IsDBNull(9))
-                        {
-                            rlevent.Optional4 = (string)reader[9];
-                        }
-                        if (!reader.IsDBNull(10))
-                        {
-                            rlevent.Optional5 = (string)reader[10];
-                        }
-                        if (!reader.IsDBNull(11))
-                        {
-                            rlevent.Optional6 = (string)reader[11];
+                            result.Add(m);
                         }
                     }
+                    return result;
                 }
-                // Pool B is created because the connection strings differ.
             }
+        } 
 
-            return rlevent;
+        public List<RLEvent> GetTodayEventsIds()
+        {
+            DateTime start = DateTime.Now;
+            DateTime finish = DateTime.Today;
+            finish = finish.AddDays(1);
+            return GetEventsBetween(start, finish);
         }
         
     }
