@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Messages>
     <Message name="StartSearchMessage" type="BotLogic">
-        <Text>Start search text</Text>
+        <Text>Привет! Выбери что ты хочешь найти!</Text>
         <Buttons>
             <Button>
                 <Text>Случайное событие на ближайшее время</Text>
@@ -9,7 +9,7 @@
             </Button>
             <Button>
                 <Text>Искать по тегам</Text>
-                <Callback>StartSearchMessage2</Callback>
+                <Callback>PopularTags</Callback>
             </Button>
             <Button>
                 <Text>Искать на ближайшее время</Text>
@@ -35,6 +35,23 @@
             <Button>
                 <Text>На этой неделе</Text>
                 <Callback>SearchNearbyThisWeek</Callback>
+            </Button>
+        </Buttons>
+    </Message>
+	    <Message name="PopularTags" type="BotLogic">
+        <Text>Чего желаете?</Text>
+        <Buttons>
+            <Button>
+                <Text>Культурные мероприятия</Text>
+                <Callback>SearchTagsCulture</Callback>
+            </Button>
+            <Button>
+                <Text>Кафе, рестораны, закусочные</Text>
+                <Callback>SearchTagsFood</Callback>
+            </Button>
+            <Button>
+                <Text>Бесплатные</Text>
+                <Callback>SearchTagsFree</Callback>
             </Button>
         </Buttons>
     </Message>
