@@ -11,6 +11,7 @@ namespace TelegaEventsBotDotNet
 
     class BotInput
     {
+        private const int messageBlockSize = 3;
         private ChatStateHandler currentState = new ChatStateHandler(-1);
         private static Logger logger = LogManager.GetCurrentClassLogger();
  
@@ -18,10 +19,28 @@ namespace TelegaEventsBotDotNet
         private Telegram.Bot.TelegramBotClient _bot;
         private SettingsWrapper _settingsWrapper;
 
+        private Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup GetPreviewKeyboard(Int32 messageCount, Int32 blockSize)
+        {
+            Int32 pagesCount = messageCount / blockSize;
+            if (messageCount % blockSize != 0)
+                pagesCount++;
+
+            var buttonLayout = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardButton[pagesCount + 1][];
+            int i = 0;
+            for (i = 0; i < pagesCount; ++i)
+            {
+                buttonLayout[i] = new[] { new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton(i.ToString(), "ListCallBack:" + i.ToString()) };
+            }
+            buttonLayout[i] = new[] { new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton("В начало!", "StartSearchMessage") };
+            return new Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup(buttonLayout);
+
+        }
+
         private Telegram.Bot.Types.ReplyMarkups.InlineKeyboardMarkup BuildKeyboardFromMessage(MessageWithButtons message)
         {
             var buttonLayout = new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardButton[message.Buttons.Count][];
-            for (int i = 0; i < message.Buttons.Count; ++i)
+            int i = 0;
+            for (i = 0; i < message.Buttons.Count; ++i)
             {
                 buttonLayout[i] = new[] { new Telegram.Bot.Types.InlineKeyboardButtons.InlineKeyboardCallbackButton(message.Buttons[i].Text, message.Buttons[i].Callback) };
             }
@@ -136,6 +155,8 @@ namespace TelegaEventsBotDotNet
                         SearchKeywords(Command, ChatID, ReplyMessageId);
                     if (currentState.CurrentBotState == BotState.AWAITINGDATE)
                         SearchByDateHandler(Command, ChatID, ReplyMessageId);
+                    if (currentState.CurrentBotState == BotState.AWAITINGPAGE)
+                        SendFullAfterPreview(Command, ChatID, ReplyMessageId);
                     return;
             }
         }
@@ -147,6 +168,67 @@ namespace TelegaEventsBotDotNet
             _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
             currentState.CurrentBotState = BotState.AWAITINGDATE;
             Console.WriteLine("Client asked for date search.");
+        }
+
+        public void SendFullAfterPreview(String Command, long ChatID, int ReplyMessageId = 0)
+        {
+            Int64 parsedId = -1;
+            String toParse = Command.Remove(0, 1);
+            if (Int64.TryParse(toParse, out parsedId))
+            {
+                DatabaseWrapper db = new DatabaseWrapper();
+                var _event = db.GetEventById(parsedId);
+                var test = _bot.SendTextMessageAsync(ChatID, _settingsWrapper.ParseEvent(_event), Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                Thread.Sleep(100);
+                var message = _settingsWrapper.StartSearchMessage(); //ВОТ ТУТ ЧИНИТЬ
+                var keyboard = BuildKeyboardFromMessage(message);
+                _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
+            }
+
+        }
+
+        public void EditMessagePreview(Int32 blockNumber, long ChatID, int ReplyMessageId = 0)
+        {
+            _bot.EditMessageTextAsync(ChatID, currentState.CurrentPreviewMessageId, currentState.messagBlocks[blockNumber], 
+                Telegram.Bot.Types.Enums.ParseMode.Markdown, false, GetPreviewKeyboard(currentState.MessagesInResult, messageBlockSize));
+        }
+
+        public bool HandleEventsPrinting(List<RLEvent> events, long ChatID, int ReplyMessageId = 0)
+        {
+            List<String> messageBlocks = new List<string>();
+            messageBlocks.Add("");
+            if (events.Count <= 3)
+            {
+                foreach (var _event in events)
+                {
+                    var test = _bot.SendTextMessageAsync(ChatID, _settingsWrapper.ParseEvent(_event), Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                }
+                return true;
+            } else
+            {
+                currentState.MessagesInResult = events.Count;
+                int counter = 0;
+                int blockCounter = 0;
+                foreach (var _event in events)
+                {
+                    if (counter == 3)
+                    {
+                        counter = 0;
+                        messageBlocks.Add("");
+                        blockCounter++;
+                    }
+                    messageBlocks[blockCounter] += (_settingsWrapper.ParsePreviewEvent(_event) + "Подробнее: /" + _event.EventId + '\n');    
+                    counter++;
+                }
+
+                currentState.messagBlocks = messageBlocks;
+                var test = _bot.SendTextMessageAsync(ChatID, messageBlocks[0], Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, GetPreviewKeyboard(events.Count, messageBlockSize)).Result;
+                currentState.CurrentBotState = BotState.AWAITINGPAGE;
+                currentState.PreviewPage = 0;
+                currentState.CurrentPreviewMessageId = test.MessageId;
+                return false;
+            }
+
         }
 
         public void SearchByDateHandler(String Command, long ChatID, int ReplyMessageId = 0)
@@ -164,14 +246,14 @@ namespace TelegaEventsBotDotNet
                     _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
                     return;
                 }
-                foreach (var _event in events)
+                if (HandleEventsPrinting(events, ChatID, ReplyMessageId))
                 {
-                    _bot.SendTextMessageAsync(ChatID, _settingsWrapper.ParseEvent(_event), Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                    Thread.Sleep(100);
+                    message = _settingsWrapper.RepeatSearchByDateSuccess();
+                    keyboard = BuildKeyboardFromMessage(message);
+                    _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
                 }
-                Thread.Sleep(100);
-                message = _settingsWrapper.RepeatSearchByDateSuccess();
-                keyboard = BuildKeyboardFromMessage(message);
-                _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
+
 
             } else
             {
@@ -193,14 +275,13 @@ namespace TelegaEventsBotDotNet
             {
                 _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
             }
-            foreach(var _event in events)
+            if (HandleEventsPrinting(events, ChatID, ReplyMessageId))
             {
-                _bot.SendTextMessageAsync(ChatID, _settingsWrapper.ParseEvent(_event), Telegram.Bot.Types.Enums.ParseMode.Markdown);
+                Thread.Sleep(100);
+                message = _settingsWrapper.RepeatSearchByKeywords();
+                keyboard = BuildKeyboardFromMessage(message);
+                _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
             }
-            Thread.Sleep(100);
-            message = _settingsWrapper.RepeatSearchByKeywords();
-            keyboard = BuildKeyboardFromMessage(message);
-            _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
         }
 
         public void HandleCallback(String Callback, long ChatID, int ReplyMessageId = 0)

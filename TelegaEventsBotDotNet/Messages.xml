@@ -119,4 +119,20 @@ _$ENTRANCEFEE_
             </Event>
         </Events>
     </Message>
+	<Message name="EventBlockPreview" type="Event">
+		<Events>
+            <Event name ="default" markup_type = "default">
+                <Label>$LABEL</Label>
+                <Text>$TEXT</Text>
+                <Location>$LOCATION</Location>
+                <DateTime>$DATETIME</DateTime>
+                <OptionalParameter1>$ENTRANCEFEE</OptionalParameter1>
+                <OptionalParameter2>$HYPERLINK</OptionalParameter2>
+                <MarkUp>
+*$LABEL*
+$TEXT
+                </MarkUp>
+            </Event>
+        </Events>
+	</Message>
 </Messages>

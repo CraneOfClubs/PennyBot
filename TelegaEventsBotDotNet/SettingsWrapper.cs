@@ -251,6 +251,46 @@ namespace TelegaEventsBotDotNet
             return MarkedUpText;
         }
 
+        public String ParsePreviewEvent(RLEvent rLEvent)
+        {
+            if (rLEvent.Label == null)
+            {
+                return NoEventsFound().Text;
+            }
+            var message = new MessageWithButtons();
+            _settingsDocument = new XmlDocument();
+            _settingsDocument.Load(_xmlFileName);
+            String MarkedUpText = "";
+            XmlElement xRoot = _settingsDocument.DocumentElement;
+            foreach (XmlNode xnode in xRoot)
+            {
+                if (xnode.Attributes.Count > 0)
+                {
+                    XmlNode attr = xnode.Attributes.GetNamedItem("name");
+                    XmlNode attrType = xnode.Attributes.GetNamedItem("type");
+                    if (attr != null && attrType != null)
+                        if (attr.Value == "EventBlockPreview")
+                        {
+                            List<Button> MessageButtons = new List<Button>();
+                            foreach (XmlNode events in xnode.ChildNodes[0].ChildNodes)
+                            {
+                                XmlNode attrTypeEvent = events.Attributes.GetNamedItem("markup_type");
+                                if (attr != null)
+                                {
+                                    if (events.Name == "Event" && attrTypeEvent.Value == rLEvent.MarkupType)
+                                    {
+                                        MarkedUpText = FormatMarkUp(events, rLEvent);
+                                    }
+                                }
+                            }
+                            message.Buttons = MessageButtons;
+                        }
+                }
+
+            }
+            return MarkedUpText;
+        }
+
         public MessageWithButtons StartSearchMessage()
         {
             logger.Debug("Start searching messages");

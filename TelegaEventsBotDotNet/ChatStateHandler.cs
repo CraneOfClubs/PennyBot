@@ -10,7 +10,8 @@ namespace TelegaEventsBotDotNet
     {
         IDLE,
         AWAITINGKEYWORD,
-        AWAITINGDATE
+        AWAITINGDATE,
+        AWAITINGPAGE
     }
     class ChatStateHandler
     {
@@ -19,6 +20,10 @@ namespace TelegaEventsBotDotNet
             ChatId = chatId;
         }
         public Int64 ChatId { get; set; }
+        public Int64 PreviewPage { get; set; }
+        public Int32 CurrentPreviewMessageId { get; set; }
+        public Int32 MessagesInResult { get; set; }
+        public List<String> messagBlocks { get; set; }
         private BotState currentBotState = BotState.IDLE;
         public BotState CurrentBotState
         {

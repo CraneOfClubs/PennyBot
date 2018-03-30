@@ -19,6 +19,13 @@ namespace TelegaEventsBotDotNet
 
         public void HandleCallback(String Callback, long ChatID, int ReplyMessageId = 0)
         {
+            if (Callback.Contains("ListCallBack"))
+            {
+                var splitted = Callback.Split(':');
+                Int32 pageNumber = -1;
+                Int32.TryParse(splitted[1], out pageNumber);
+                _botInput.EditMessagePreview(pageNumber, ChatID, ReplyMessageId);
+            }
             if (Callback == "StartSearchMessage")
             {
                 logger.Info("calling SearchNearbyDate");

@@ -88,6 +88,25 @@ namespace TelegaEventsBotDotNet
             }
         }
 
+        public RLEvent GetEventById(Int64 id)
+        {
+            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["NskEventsDB"].ConnectionString;
+            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            {
+                using (var context = new EventContext(connection, false))
+                {
+                    var _events = from ev in context.Events
+                                  where (ev.EventId == id)
+                                  select ev;
+                    if (_events.Count() < 1)
+                    {
+                        return null;
+                    } else 
+                    return _events.ToList<RLEvent>()[0];
+                }
+            }
+        }
+
         public List<RLEvent> GetEventIDsByKeyword(List<String> Keywords)
         {
             var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["NskEventsDB"].ConnectionString;
