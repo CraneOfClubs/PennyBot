@@ -12,7 +12,6 @@ namespace TelegaEventsBotDotNet
         private static Logger logger = LogManager.GetCurrentClassLogger();
         private String _apiKey;
         private Telegram.Bot.TelegramBotClient _bot;
-        //private BotInput _inputWrapper;
 
         private void HandleCommand(String message, long chatId, int messageId)
         {
@@ -40,10 +39,9 @@ namespace TelegaEventsBotDotNet
         async void BotInit()
         {
             await _bot.SetWebhookAsync("");
-            //_inputWrapper = new BotInput(_bot);
             _bot.OnUpdate += async (object su, Telegram.Bot.Args.UpdateEventArgs evu) =>
             {
-                if (evu.Update.CallbackQuery != null || evu.Update.InlineQuery != null) return; // в этом блоке нам келлбэки и инлайны не нужны
+                if (evu.Update.CallbackQuery != null || evu.Update.InlineQuery != null) return;
                 var update = evu.Update;
                 var message = update.Message;
                 if (message == null) return;
@@ -57,18 +55,7 @@ namespace TelegaEventsBotDotNet
             {
                 var message = ev.CallbackQuery.Message;
                 HandleCallback(ev.CallbackQuery.Data, message.Chat.Id, message.MessageId);
-                //_inputWrapper.HandleCallback(ev.CallbackQuery.Data, message.Chat.Id, message.MessageId);
                 await _bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id); // отсылаем пустое, чтобы убрать "частики" на кнопке
-                //if (ev.CallbackQuery.Data == "callback1")
-                //{
-                //    await _bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id, "Хуй " + ev.CallbackQuery.Data, true);
-                //}
-                //else
-                //if (ev.CallbackQuery.Data == "callback2")
-                //{
-                //    //await Bot.SendTextMessageAsync(message.Chat.Id, "Залупа", replyToMessageId: message.MessageId);
-                //    // await Bot.AnswerCallbackQueryAsync(ev.CallbackQuery.Id); // отсылаем пустое, чтобы убрать "частики" на кнопке
-                //}
             };
             _bot.StartReceiving();
         }

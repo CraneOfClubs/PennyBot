@@ -73,7 +73,6 @@ namespace TelegaEventsBotDotNet
             var message = _settingsWrapper.SearchNearbyDate();
             var keyboard = BuildKeyboardFromMessage(message);
             _bot.SendTextMessageAsync(ChatID, message.Text, Telegram.Bot.Types.Enums.ParseMode.Markdown, false, false, 0, keyboard);
-            //logger.Info("Client asked for nearby events.");
             Console.WriteLine("Client asked for nearby events.");
         }
 
@@ -145,7 +144,6 @@ namespace TelegaEventsBotDotNet
             switch (Command)
             {
                 case "/say":
-                    //GreetMessage(ChatID, ReplyMessageId);
                     break;
                 case "/start":
                     StartSearchMessage(ChatID);
